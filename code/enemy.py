@@ -17,13 +17,13 @@ class Enemy(AnimatedTile):
                     self.direction.x = -1
         
 
-    def update(self,collision_sprites):
+    def update(self,collision_sprites,shift):
         self.collision(collision_sprites)
 
         self.rect.x += self.direction.x * self.enemy_speed
         if self.direction.x > 0:
-            return super().update(flip = True)
+            return super().update(shift,flip = True)
         else:
-            return super().update()
+            return super().update(shift)
     
     

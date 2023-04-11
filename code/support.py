@@ -17,7 +17,7 @@ def import_cut_graphics(path):
     surface_list = []
     for row in range(tile_number_y):
         for col in range(tile_number_x):
-            new_surf = pygame.Surface((TILE_SIZE,TILE_SIZE))
+            new_surf = pygame.Surface((TILE_SIZE,TILE_SIZE),flags= pygame.SRCALPHA)
             area_rect_x = col * TILE_SIZE
             area_rect_y = row * TILE_SIZE
             new_surf.blit(source = tile_image,dest=(0,0),area=pygame.Rect(area_rect_x,area_rect_y,TILE_SIZE,TILE_SIZE))
