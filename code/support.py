@@ -34,9 +34,7 @@ def import_graphics(paths):
 def import_images(path):
     surface_list = []
     for _,__,img_files in walk(path):
-        
         for image in img_files:
-            
             
             full_path = path +'/'+image
             surface_list.append(pygame.image.load(full_path).convert_alpha())

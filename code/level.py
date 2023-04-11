@@ -1,7 +1,8 @@
 import pygame
 from settings import *
 from support import import_csv_layout,import_cut_graphics,import_graphics
-from tiles import Tile,StaticTile,Crate,AnimatedTile,Enemy
+from tiles import Tile,StaticTile,Crate,AnimatedTile
+from enemy import Enemy
 
 
 class Level:
@@ -107,7 +108,7 @@ class Level:
 
         
         self.enemies_obstacle_sprites.update()
-        
+
         self.enemies_sprites.draw(self.display_surface)
         self.enemies_sprites.update(self.enemies_obstacle_sprites)
 
