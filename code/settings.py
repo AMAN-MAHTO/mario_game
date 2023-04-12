@@ -15,3 +15,10 @@ TILE_IMAGE_PATH = {
     "player":"../graphics/character/setup_tiles.png",
     
 }
+
+CAMERA_BODERS ={
+    'left':100,
+    'right':200,
+    'top':100,
+    'bottom':200
+}

@@ -6,14 +6,15 @@ class Enemy(AnimatedTile):
         super().__init__(size, x, y, path)
         self.direction = pygame.math.Vector2(-1,0)
         self.enemy_speed = 2
+
     def collision(self,collision_sprites):
-        for sprtie in collision_sprites:
-            if sprtie.rect.colliderect(self.rect):
+        for sprite in collision_sprites:
+            if sprite.rect.colliderect(self.rect):
                 if self.direction.x < 0:
-                    self.rect.left = sprtie.rect.right 
+                    self.rect.left = sprite.rect.right 
                     self.direction.x = 1
                 elif self.direction.x > 0:
-                    self.rect.right = sprtie.rect.left 
+                    self.rect.right = sprite.rect.left
                     self.direction.x = -1
         
 

@@ -10,7 +10,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = (x,y))
     
     def update(self,shift):
-        self.rect.x += shift
+        self.rect.x -= shift
         
 
 class StaticTile(Tile):
