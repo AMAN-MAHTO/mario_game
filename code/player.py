@@ -32,6 +32,9 @@ class Player(pygame.sprite.Sprite):
         self.facing_right = True
         self.current_x = 0
 
+        self.particle_frame_index =0
+        self.jump = False
+
     def earn_pint(self):
         for sprite in self.good_collision_sprites:
             if sprite.rect.colliderect(self.rect):
@@ -44,6 +47,12 @@ class Player(pygame.sprite.Sprite):
         for animation in self.animation_dict.keys():
             full_path = current_path + animation
             self.animation_dict[animation] = import_images(full_path)
+        
+        current_path = '../graphics/character/dust_particles/'
+        self.particle_dict = {'run':[],'jump':[],'land':[]}
+        for animation in self.particle_dict.keys():
+            full_path = current_path + animation
+            self.particle_dict[animation] = import_images(full_path)
         
     def animate(self):
         animation_position = self.animation_dict[self.staus]
@@ -86,6 +95,7 @@ class Player(pygame.sprite.Sprite):
                 self.staus = 'idle'
 
     def input(self):
+        self.jump = False
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
             self.direction.x = 1
@@ -98,57 +108,15 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_w] and self.on_floor:
             self.direction.y = -self.jump_speed
-
-    def horixontal_collision(self):
-        for collision_sprites in self.collison_sprites:
-            for sprite in collision_sprites.sprites():
-                if sprite.rect.colliderect(self.rect):
-                    if self.direction.x > 0:
-                        self.rect.right = sprite.rect.left
-                        self.on_right = True
-                        self.current_x = self.rect.right
-                    if self.direction.x < 0:
-                        self.rect.left = sprite.rect.right
-                        self.on_left = True
-                        self.current_x = self.rect.left
-
-        if self.on_right and (self.current_x < self.rect.right or self.direction.x <= 0):
-            self.on_right = False
-        if self.on_left and (self.current_x > self.rect.left or self.direction.x >= 0):
-            self.on_left = False
-
-    def vertical_collison(self):
-        for collision_sprites in self.collison_sprites:
-            for sprite in collision_sprites.sprites():
-                if sprite.rect.colliderect(self.rect):
-                    if self.direction.y < 0:
-                        self.rect.top = sprite.rect.bottom
-                        self.direction.y = 0
-                        self.on_celling = True
-                    if self.direction.y > 0:
-
-                        self.rect.bottom = sprite.rect.top
-
-                        self.on_floor = True
-                        self.direction.y = 0
-
-        if self.on_floor and self.direction.y > 1 or self.direction.y < 0:
-            self.on_floor = False
-        if self.on_celling and self.direction.y > 0:
-            self.on_celling = False
-   
+            self.jump = True
+        
     def apply_gravity(self):
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
 
     def update(self):
         self.input()
-
-        self.rect.x += self.direction.x * self.speed
-        self.horixontal_collision()
-
-        self.apply_gravity()
-        self.vertical_collison()
+        
         self.player_status()
         self.animate()
         self.earn_pint()

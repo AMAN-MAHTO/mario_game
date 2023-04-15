@@ -38,7 +38,7 @@ class Water:
         self.water_sprite.draw(surface)
 
 class Cloud:
-    def __init__(self,horizon,level_length,number_of_cloud):
+    def __init__(self,horizon,level_length,number_of_cloud,image_folder_path = '../graphics/decoration/clouds'):
         min_x = -SCREEN_WIDTH
         max_x = level_length +SCREEN_WIDTH
         min_y = 0
@@ -46,7 +46,7 @@ class Cloud:
         self.cloud_sprites = pygame.sprite.Group()
 
         for i in range(number_of_cloud):
-            cloud = choice(import_images('../graphics/decoration/clouds'))
+            cloud = choice(import_images(image_folder_path))
             x = randint(min_x,max_x)
             y = randint(min_y,max_y)
             self.cloud_sprites.add(StaticTile(0,x,y,cloud))

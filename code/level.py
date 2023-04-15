@@ -5,6 +5,7 @@ from tiles import Tile,StaticTile,Crate,AnimatedTile
 from enemy import Enemy
 from decoration import Sky,Cloud,Water
 from player import Player
+from particle import ParticleAnimation
 
 
 class Level:
@@ -45,6 +46,14 @@ class Level:
         level_length = len(self.tarrain_layout[0]) * TILE_SIZE
         self.water_sprite = Water(SCREEN_HEIGHT - 30,level_length)
         self.cloud_sprites = Cloud(SCREEN_HEIGHT - 400,level_length,30)
+
+
+        #run particle animation
+        self.particle_frame_index = 0
+        self.particle_animation_speed = 0.15
+
+        #jump particle animation
+        self.jump_sprtie = pygame.sprite.GroupSingle()
 
 
     def create_tile_group(self,levle_layout,type):
@@ -113,6 +122,43 @@ class Level:
 
         return sprite_group
     
+    def run_particle_animation(self):
+        player = self.player_sprites.sprite
+        if player.staus == 'run' and player.on_floor:
+            run_frame_list = player.particle_dict['run']
+            self.particle_frame_index += self.particle_animation_speed
+            if self.particle_frame_index >= len(run_frame_list): self.particle_frame_index = 0
+            image = run_frame_list[int(self.particle_frame_index)]
+            if player.facing_right:
+                pos = player.rect.bottomleft + pygame.math.Vector2(-8,-10)
+            
+            else:
+                pos = player.rect.bottomright + pygame.math.Vector2(0,-10)
+                image = pygame.transform.flip(image,True,False)
+            
+        
+            self.display_surface.blit(image,pos)
+    
+    def create_jump_particle(self):
+        player = self.player_sprites.sprite
+        if player.facing_right:
+            offset = player.rect.midbottom - pygame.math.Vector2(28,30)
+            self.jump_sprtie.add(ParticleAnimation(offset,'jump'))
+        else:
+            offset = player.rect.midbottom - pygame.math.Vector2(2,30)
+            self.jump_sprtie.add(ParticleAnimation(offset,'jump'))
+    
+    def create_landing_particle(self):
+        player = self.player_sprites.sprite
+        if self.on_ground_before_verticle_collision == False and player.on_floor:
+            if player.facing_right:
+                offset = player.rect.midbottom - pygame.math.Vector2(65,40)
+                self.jump_sprtie.add(ParticleAnimation(offset,'land'))
+            else:
+                offset = player.rect.midbottom - pygame.math.Vector2(35,40)
+                self.jump_sprtie.add(ParticleAnimation(offset,'land'))
+    
+
     def player_setup(self,layout):
         
         for row_index,row_val in enumerate(layout):
@@ -144,6 +190,49 @@ class Level:
             self.world_shift = 0
             player.speed = 8
 
+    def horixontal_collision(self):
+        player = self.player_sprites.sprite
+        player.rect.x += player.direction.x * player.speed
+
+        for sprite in self.tarrain_sprites.sprites() + self.crates_sprites.sprites():
+            if sprite.rect.colliderect(player.rect):
+                if player.direction.x > 0:
+                    player.rect.right = sprite.rect.left
+                    self.on_right = True
+                    player.current_x = player.rect.right
+                if player.direction.x < 0:
+                    player.rect.left = sprite.rect.right
+                    player.on_left = True
+                    player.current_x = player.rect.left
+
+        if player.on_right and (player.current_x < player.rect.right or player.direction.x <= 0):
+            player.on_right = False
+        if player.on_left and (player.current_x > player.rect.left or player.direction.x >= 0):
+            player.on_left = False
+
+    def vertical_collison(self):
+        player = self.player_sprites.sprite
+        player.apply_gravity()
+
+        
+        for sprite in self.tarrain_sprites.sprites() + self.crates_sprites.sprites():
+            if sprite.rect.colliderect(player.rect):
+                if player.direction.y < 0:
+                    player.rect.top = sprite.rect.bottom
+                    player.direction.y = 0
+                    player.on_celling = True
+                if player.direction.y > 0:
+
+                    player.rect.bottom = sprite.rect.top
+
+                    player.on_floor = True
+                    player.direction.y = 0
+
+        if player.on_floor and player.direction.y > 1 or player.direction.y < 0:
+            player.on_floor = False
+        if player.on_celling and player.direction.y > 0:
+            player.on_celling = False
+   
 
     def run(self):
         #decoration
@@ -169,10 +258,22 @@ class Level:
         self.enemies_sprites.update(self.enemies_obstacle_sprites,self.world_shift)
 
         #player
+        self.horixontal_collision()
+        self.on_ground_before_verticle_collision = self.player_sprites.sprite.on_floor
+        self.vertical_collison()
         self.player_sprites.update()
         self.player_sprites.draw(self.display_surface)
         self.goal_sprite.draw(self.display_surface)
         self.goal_sprite.update(self.world_shift)
+
+        #particle animation
+        self.create_landing_particle()
+        if self.player_sprites.sprite.jump:
+            self.create_jump_particle()
+
+        self.run_particle_animation()
+        self.jump_sprtie.draw(self.display_surface)
+        self.jump_sprtie.update(self.world_shift)
 
         #fb palms
         self.fb_palms_sprites.draw(self.display_surface)
@@ -180,7 +281,6 @@ class Level:
 
         self.coins_sprites.draw(self.display_surface)
         self.coins_sprites.update(self.world_shift)
-
         
         #water
         self.water_sprite.draw(self.display_surface,shift=self.world_shift)
