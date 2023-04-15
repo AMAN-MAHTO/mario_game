@@ -17,6 +17,9 @@ class StaticTile(Tile):
     def __init__(self,size,x,y,surface):
         super().__init__(size,x,y)
         self.image = surface
+        offset_x = self.rect.x + TILE_SIZE - self.image.get_size()[0]
+        offset_y = self.rect.y + TILE_SIZE - self.image.get_size()[1]
+        self.rect = self.image.get_rect(topleft = (offset_x,offset_y))
 
 class Crate(Tile):
     def __init__(self,size,x,y,surface):
