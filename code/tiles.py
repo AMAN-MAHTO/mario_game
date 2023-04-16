@@ -30,6 +30,7 @@ class Crate(Tile):
         offset_y = y + TILE_SIZE - self.image.get_size()[1]
         self.rect = self.image.get_rect(topleft = (offset_x,offset_y))
 
+
 class AnimatedTile(Tile):
     def __init__(self,size,x,y,path):
         super().__init__(size,x,y)
@@ -66,3 +67,10 @@ class AnimatedTile(Tile):
        
         return super().update(shift)
 
+class Coin(AnimatedTile):
+    def __init__(self,size,x,y,path,value):
+        super().__init__(size,x,y,path)
+        self.value = value
+    
+    def update(self, shift):
+        return super().update(shift)

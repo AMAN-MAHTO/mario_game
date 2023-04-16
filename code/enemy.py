@@ -1,5 +1,6 @@
 from tiles import AnimatedTile
 import pygame
+from support import import_images
 
 class Enemy(AnimatedTile):
     def __init__(self, size, x, y, path):
@@ -16,6 +17,7 @@ class Enemy(AnimatedTile):
                 elif self.direction.x > 0:
                     
                     self.direction.x = -1
+                
         
 
     def update(self,collision_sprites,shift):

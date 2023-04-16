@@ -4,10 +4,10 @@ from support import import_images
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, collision_sprites,good_collision_sprites,surface):
+    def __init__(self, pos,surface):
         super().__init__()
         self.diplay_surface = surface
-        self.good_collision_sprites = good_collision_sprites       
+               
         
         self.importing_player_assets()
         self.frame_index = 0
@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_speed = 20
 
         #player collision
-        self.collison_sprites = collision_sprites
+        
         self.on_floor = False
         self.on_celling = False
         self.on_left = False
@@ -35,10 +35,7 @@ class Player(pygame.sprite.Sprite):
         self.particle_frame_index =0
         self.jump = False
 
-    def earn_pint(self):
-        for sprite in self.good_collision_sprites:
-            if sprite.rect.colliderect(self.rect):
-                sprite.kill()
+   
 
     def importing_player_assets(self):
         current_path = "../graphics/character/"
@@ -119,7 +116,7 @@ class Player(pygame.sprite.Sprite):
         
         self.player_status()
         self.animate()
-        self.earn_pint()
+        
         
         
         

@@ -1,15 +1,19 @@
 import pygame
 from settings import *
 from support import import_csv_layout,import_cut_graphics,import_graphics
-from tiles import Tile,StaticTile,Crate,AnimatedTile
+from tiles import Tile,StaticTile,Crate,AnimatedTile,Coin
 from enemy import Enemy
 from decoration import Sky,Cloud,Water
 from player import Player
 from particle import ParticleAnimation
+from game_data import Level_level,Level_Passed
 
 
 class Level:
-    def __init__(self,level_data,surface):
+    def __init__(self,current_level,surface,create_overworld,update_coin_count):
+        level_data = Level_level[current_level]
+        self.current_level = current_level
+        self.create_overworld = create_overworld
         self.world_shift = 0
         self.display_surface = surface
         self.tarrain_layout = import_csv_layout(level_data['terrain'])
@@ -35,11 +39,14 @@ class Level:
         self.enemies_obstacle_sprites = self.create_tile_group(self.enemies_layout,'enemies_obstacle')
 
         #player
+        self.player_collided_goal = False
         self.goal_sprite = pygame.sprite.GroupSingle()
         self.player_sprites = pygame.sprite.GroupSingle()
         self.player_layout = import_csv_layout(level_data['player'])
         self.player_setup(self.player_layout)
         
+        #score
+        self.update_coin_count = update_coin_count
 
         #decoration
         self.sky = Sky(8)
@@ -101,10 +108,11 @@ class Level:
                     if type == "coins":
                         if col_value == "0":
                             path = "../graphics/coins/gold"
+                            value = 5
                         else:
                             path = "../graphics/coins/silver"
-                         
-                        tile_sprite = AnimatedTile(TILE_SIZE,x,y,path)
+                            value =1
+                        tile_sprite = Coin(TILE_SIZE,x,y,path,value)
                         sprite_group.add(tile_sprite)
                     
                     if type == "enemies":
@@ -122,6 +130,8 @@ class Level:
 
         return sprite_group
     
+    
+
     def run_particle_animation(self):
         player = self.player_sprites.sprite
         if player.staus == 'run' and player.on_floor:
@@ -158,7 +168,6 @@ class Level:
                 offset = player.rect.midbottom - pygame.math.Vector2(35,40)
                 self.jump_sprtie.add(ParticleAnimation(offset,'land'))
     
-
     def player_setup(self,layout):
         
         for row_index,row_val in enumerate(layout):
@@ -167,9 +176,7 @@ class Level:
                 y = row_index * TILE_SIZE
                 if col_value != '-1':
                     if col_value == '0':
-                        collidabel_sprites = [self.tarrain_sprites,self.crates_sprites]
-                        good_collidabel_sprites = self.coins_sprites
-                        sprite = Player((x,y),collidabel_sprites,good_collidabel_sprites,self.display_surface)
+                        sprite = Player((x,y),self.display_surface)
                         self.player_sprites.add(sprite)
                     else:
                         hat_image = pygame.image.load('../graphics/character/hat.png')
@@ -233,8 +240,43 @@ class Level:
         if player.on_celling and player.direction.y > 0:
             player.on_celling = False
    
+    def player_death(self):
+        player = self.player_sprites.sprite
+        if player.rect.y >= SCREEN_HEIGHT:
+            pygame.time.wait(800)
+            self.call_overworld()
+
+    def input(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            self.call_overworld()
+            
+    def call_overworld(self):
+        self.create_overworld(self.current_level)
+
+    def unlock_level(self):
+        self.current_level +=1
+        Level_Passed[str(self.current_level)] = True
+        self.call_overworld()
+
+    def reached_goal(self):
+        player_sprite = self.player_sprites.sprite
+        goal_sprtie = self.goal_sprite.sprite
+        
+        if player_sprite.rect.colliderect(goal_sprtie) and self.player_collided_goal == False:
+            pygame.time.wait(1000)
+            self.unlock_level()
+        self.player_collided_goal = player_sprite.rect.colliderect(goal_sprtie)
+
+    def coin_collision(self):
+        collided_coins = pygame.sprite.spritecollide(self.player_sprites.sprite,self.coins_sprites,True)
+        if collided_coins:
+            for coin in collided_coins:
+                self.update_coin_count(coin.value)
 
     def run(self):
+        #overworld esc input
+        self.input()
         #decoration
         self.sky.draw(self.display_surface)
         self.cloud_sprites.draw(self.display_surface,self.world_shift)
@@ -265,6 +307,7 @@ class Level:
         self.player_sprites.draw(self.display_surface)
         self.goal_sprite.draw(self.display_surface)
         self.goal_sprite.update(self.world_shift)
+        self.coin_collision()
 
         #particle animation
         self.create_landing_particle()
@@ -286,5 +329,7 @@ class Level:
         self.water_sprite.draw(self.display_surface,shift=self.world_shift)
 
         self.scroll_x()
+        self.reached_goal()
+        self.player_death()
         # self.camera(self.player_sprites.sprites()[0])
         

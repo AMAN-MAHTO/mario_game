@@ -7,7 +7,8 @@ from tiles import StaticTile,AnimatedTile,Tile
 from game_data import Level_Passed
 
 class Cursour:
-    def __init__(self,surface,center_list,current_level):
+    def __init__(self,surface,center_list,current_level,create_level):
+        self.create_level = create_level
         self.display_surface = surface
         self.center_list = center_list
         self.direction = pygame.math.Vector2()
@@ -22,7 +23,7 @@ class Cursour:
 
         self.d_keydown = False
         self.a_keydown = False
-        self.level_number = current_level
+        self.current_level = current_level
 
 
     def palcing_cursur(self,current_pos,destination_pos):
@@ -56,7 +57,7 @@ class Cursour:
             self.direction.x=0
             self.current_index = self.destination_index
             self.pos = self.center_list[self.current_index]
-            self.level_number = self.current_index
+            self.current_level = self.current_index
             
         
 
@@ -76,8 +77,8 @@ class Cursour:
             if self.destination_index < 0:
                 self.destination_index = 0
        
-        # else:
-        #     self.direction.x = 0
+        if keys[pygame.K_SPACE]:
+            self.create_level(self.current_level)
 
         self.d_keydown = keys[pygame.K_d]
         self.a_keydown = keys[pygame.K_a]
@@ -86,12 +87,12 @@ class Cursour:
         self.input()
         self.palcing_cursur(self.center_list[self.current_index],self.center_list[self.destination_index])
 
-        return self.level_number
 
 class Overworld:
-    def __init__(self,surface,current_level):
+    def __init__(self,surface,current_level,create_level):
         self.display_surface = surface
         self.world_shift = 0
+        
 
         #decoration
         self.sky = Sky(7)
@@ -110,7 +111,7 @@ class Overworld:
         self.center_list = []
         self.center_list_update()
 
-        self.cursour = Cursour(self.display_surface,self.center_list,current_level)
+        self.cursour = Cursour(self.display_surface,self.center_list,current_level,create_level)
         
 
     def create_sprites(self,level_layout):

@@ -22,13 +22,14 @@ level_1 ={
 
 Level_Passed = {
     '0':True,
-    "1":True,
+    "1":False,
     '2':False,
     "3":False,
     "4":False,
     "5":False,
     
 }
+
 
 Level_level ={
     0:level_0,
