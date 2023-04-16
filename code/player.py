@@ -1,10 +1,11 @@
 import pygame
 from settings import *
 from support import import_images
+from math import sin
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos,surface):
+    def __init__(self, pos,surface,update_health):
         super().__init__()
         self.diplay_surface = surface
                
@@ -35,7 +36,27 @@ class Player(pygame.sprite.Sprite):
         self.particle_frame_index =0
         self.jump = False
 
-   
+        #health mangement
+        self.update_health = update_health
+        self.invinsiblity = False
+        self.invinsiblity_time = 400
+        self.hurt_time = 0
+
+    def get_damage(self):
+        if not self.invinsiblity:
+            self.update_health(-10)
+            self.invinsiblity = True
+            self.hurt_time = pygame.time.get_ticks()
+            
+    def invisibility_timer(self):
+        if pygame.time.get_ticks() - self.hurt_time >= self.invinsiblity_time:
+            self.invinsiblity = False
+    
+    def wave_value(self):
+        value = sin(pygame.time.get_ticks())
+        if value >= 0: return 255
+        else: return 0
+        
 
     def importing_player_assets(self):
         current_path = "../graphics/character/"
@@ -64,6 +85,12 @@ class Player(pygame.sprite.Sprite):
         else:
             flipped_image = pygame.transform.flip(image, True, False)
             self.image = flipped_image
+
+        if self.invinsiblity:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
 
         # set rect
         if self.on_floor and self.on_right:
@@ -113,9 +140,9 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         self.input()
-        
         self.player_status()
         self.animate()
+        self.invisibility_timer()
         
         
         

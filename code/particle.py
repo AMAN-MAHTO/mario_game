@@ -9,11 +9,13 @@ class ParticleAnimation(pygame.sprite.Sprite):
         self.animation_speed = 0.5
         if type == "jump":
             self.frames = import_images("../graphics/character/dust_particles/jump")
-        elif type == "land":
+        if type == "land":
             self.frames = import_images("../graphics/character/dust_particles/land")
-        
+        if type == "explosion":
+            self.frames = import_images("../graphics/enemy/explosion")
+
         self.image = self.frames[self.frame_index]
-        self.rect = pos 
+        self.rect = self.image.get_rect(center = pos) 
 
     def animation(self):
         self.frame_index += self.animation_speed
