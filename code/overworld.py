@@ -7,7 +7,8 @@ from tiles import StaticTile,AnimatedTile,Tile
 from game_data import Level_Passed
 
 class Cursour:
-    def __init__(self,surface,center_list,current_level,create_level):
+    def __init__(self,surface,center_list,current_level,create_level,create_no_level_message):
+        self.create_no_level_message = create_no_level_message
         self.create_level = create_level
         self.display_surface = surface
         self.center_list = center_list
@@ -78,7 +79,10 @@ class Cursour:
                 self.destination_index = 0
        
         if keys[pygame.K_SPACE]:
-            self.create_level(self.current_level)
+            if self.current_level >=3:
+                self.create_no_level_message()
+            else:
+                self.create_level(self.current_level)
 
         self.d_keydown = keys[pygame.K_d]
         self.a_keydown = keys[pygame.K_a]
@@ -89,7 +93,7 @@ class Cursour:
 
 
 class Overworld:
-    def __init__(self,surface,current_level,create_level):
+    def __init__(self,surface,current_level,create_level,create_no_level_message):
         self.display_surface = surface
         self.world_shift = 0
         
@@ -111,7 +115,7 @@ class Overworld:
         self.center_list = []
         self.center_list_update()
 
-        self.cursour = Cursour(self.display_surface,self.center_list,current_level,create_level)
+        self.cursour = Cursour(self.display_surface,self.center_list,current_level,create_level,create_no_level_message)
         
 
     def create_sprites(self,level_layout):

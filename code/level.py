@@ -10,9 +10,10 @@ from game_data import Level_level,Level_Passed
 
 
 class Level:
-    def __init__(self,current_level,surface,create_overworld,update_coin_count,update_health,what_current_health):
+    def __init__(self,current_level,surface,create_overworld,update_coin_count,update_health,what_current_health,reset):
         level_data = Level_level[current_level]
-        print(level_data)
+        
+        self.reset = reset
         self.current_level = current_level
         self.create_overworld = create_overworld
         self.what_current_health = what_current_health
@@ -39,6 +40,8 @@ class Level:
         self.enemies_layout = import_csv_layout(level_data['enemies'])
         self.enemies_sprites = self.create_tile_group(self.enemies_layout,'enemies')
         self.enemies_obstacle_sprites = self.create_tile_group(self.enemies_layout,'enemies_obstacle')
+        self.stomp_sound = pygame.mixer.Sound('../audio/effects/stomp.wav')
+
 
         #player health
         self.update_health = update_health
@@ -251,6 +254,8 @@ class Level:
         player = self.player_sprites.sprite
         if player.rect.y >= SCREEN_HEIGHT:
             pygame.time.wait(800)
+            if self.current_level == 0:
+                self.reset()
             self.call_overworld()
         
 
@@ -293,6 +298,7 @@ class Level:
                 player_bottom = self.player_sprites.sprite.rect.bottom
 
                 if enime_top < player_bottom < enime_centery and self.player_sprites.sprite.direction.y >= 0:
+                    self.stomp_sound.play()
                     self.player_sprites.sprite.direction.y = -15
                     explosion_sprite = ParticleAnimation(enime.rect.center,"explosion")
                     self.explosion_sprites.add(explosion_sprite)

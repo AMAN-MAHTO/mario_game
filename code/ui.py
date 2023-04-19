@@ -1,4 +1,5 @@
 import pygame
+from settings import SCREEN_HEIGHT,SCREEN_WIDTH
 
 class UI:
     def __init__(self,screen):
@@ -29,3 +30,11 @@ class UI:
         text_rect = text_surface.get_rect(midleft = (self.coin_rect.right + 10,self.coin_rect.centery))
         self.diaplay_surface.blit(self.coin,self.coin_rect)
         self.diaplay_surface.blit(text_surface,text_rect)
+    
+    def show_no_level_message(self):
+        
+        text_surface = self.font.render("Comming soon!",False,'#33323d')
+        text_rect = text_surface.get_rect(center = (SCREEN_WIDTH/2,SCREEN_HEIGHT/2))
+        self.diaplay_surface.blit(text_surface,text_rect)
+        
+        

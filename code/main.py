@@ -10,7 +10,7 @@ from ui import UI
 class Game:
     def __init__(self):
         self.max_level = 0
-        self.overworld = Overworld(screen,self.max_level,self.create_level)
+        self.overworld = Overworld(screen,self.max_level,self.create_level,self.create_no_level_message)
         self.staus = "overworld"
 
         #ui
@@ -19,14 +19,16 @@ class Game:
         self.current_health = 100
         self.coin_count = 0
 
+    def create_no_level_message(self):
+        self.ui.show_no_level_message()
 
     def create_level(self,current_level):
-        self.level = Level(current_level,screen,self.create_overworld,self.update_coin_count,self.update_health,self.what_current_health)
+        self.level = Level(current_level,screen,self.create_overworld,self.update_coin_count,self.update_health,self.what_current_health,self.reset)
         self.staus = "level"
 
     
     def create_overworld(self,current_level):
-        self.overworld = Overworld(screen,current_level,self.create_level)
+        self.overworld = Overworld(screen,current_level,self.create_level,self.create_no_level_message)
         self.staus = 'overworld'
     
     def what_current_health(self):
@@ -53,12 +55,13 @@ class Game:
             self.overworld.run()
             overworld_music.play(loops= -1)
             level_music.stop()
-        else:
+        elif self.staus == 'level':
             self.level.run()
             self.ui.show_health_bar(self.current_health,self.health)
             self.ui.show_coin(self.coin_count)
             overworld_music.stop()
             # level_music.play(loops= -1)
+        
         
         if self.current_health <=0:
             pygame.time.wait(1000)
@@ -72,9 +75,9 @@ screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 
 #sound
 overworld_music = pygame.mixer.Sound('../audio/overworld_music.wav')
-overworld_music.set_volume(0.3)
+
 level_music = pygame.mixer.Sound("../audio/level_music.wav")
-level_music.set_volume(0.1)
+
 
 # level_active = False
 # current_level=0
