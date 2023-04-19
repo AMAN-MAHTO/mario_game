@@ -23,6 +23,7 @@ class Game:
     def create_level(self,current_level):
         self.level = Level(current_level,screen,self.create_overworld,self.update_coin_count,self.update_health,self.what_current_health)
         self.staus = "level"
+
     
     def create_overworld(self,current_level):
         self.overworld = Overworld(screen,current_level,self.create_level)
@@ -45,16 +46,19 @@ class Game:
                 Level_Passed[key] = False
                 
         current_level = 0
-        
         self.create_overworld(0)
 
     def run(self):
         if self.staus == "overworld":
             self.overworld.run()
+            overworld_music.play(loops= -1)
+            level_music.stop()
         else:
             self.level.run()
             self.ui.show_health_bar(self.current_health,self.health)
             self.ui.show_coin(self.coin_count)
+            overworld_music.stop()
+            # level_music.play(loops= -1)
         
         if self.current_health <=0:
             pygame.time.wait(1000)
@@ -65,6 +69,12 @@ clock = pygame.time.Clock()
 
 #game window
 screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+
+#sound
+overworld_music = pygame.mixer.Sound('../audio/overworld_music.wav')
+overworld_music.set_volume(0.3)
+level_music = pygame.mixer.Sound("../audio/level_music.wav")
+level_music.set_volume(0.1)
 
 # level_active = False
 # current_level=0

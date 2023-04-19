@@ -12,6 +12,7 @@ from game_data import Level_level,Level_Passed
 class Level:
     def __init__(self,current_level,surface,create_overworld,update_coin_count,update_health,what_current_health):
         level_data = Level_level[current_level]
+        print(level_data)
         self.current_level = current_level
         self.create_overworld = create_overworld
         self.what_current_health = what_current_health
@@ -51,6 +52,7 @@ class Level:
         
         #score
         self.update_coin_count = update_coin_count
+        self.coin_sound = pygame.mixer.Sound("../audio/effects/coin.wav")
 
 
         #decoration
@@ -205,46 +207,45 @@ class Level:
 
     def horixontal_collision(self):
         player = self.player_sprites.sprite
-        player.rect.x += player.direction.x * player.speed
+        player.collision_rect.x += player.direction.x * player.speed
 
         for sprite in self.tarrain_sprites.sprites() + self.crates_sprites.sprites():
-            if sprite.rect.colliderect(player.rect):
+            if sprite.rect.colliderect(player.collision_rect):
                 if player.direction.x > 0:
-                    player.rect.right = sprite.rect.left
-                    self.on_right = True
+                    player.collision_rect.right = sprite.rect.left
+                    player.on_right = True
                     player.current_x = player.rect.right
                 if player.direction.x < 0:
-                    player.rect.left = sprite.rect.right
+                    player.collision_rect.left = sprite.rect.right
                     player.on_left = True
                     player.current_x = player.rect.left
 
-        if player.on_right and (player.current_x < player.rect.right or player.direction.x <= 0):
-            player.on_right = False
-        if player.on_left and (player.current_x > player.rect.left or player.direction.x >= 0):
-            player.on_left = False
+        # if player.on_right and (player.current_x < player.rect.right or player.direction.x <= 0):
+        #     player.on_right = False
+        # if player.on_left and (player.current_x > player.rect.left or player.direction.x >= 0):
+        #     player.on_left = False
 
     def vertical_collison(self):
         player = self.player_sprites.sprite
         player.apply_gravity()
-
         
         for sprite in self.tarrain_sprites.sprites() + self.crates_sprites.sprites():
-            if sprite.rect.colliderect(player.rect):
+            if sprite.rect.colliderect(player.collision_rect):
                 if player.direction.y < 0:
-                    player.rect.top = sprite.rect.bottom
+                    player.collision_rect.top = sprite.rect.bottom
                     player.direction.y = 0
                     player.on_celling = True
                 if player.direction.y > 0:
 
-                    player.rect.bottom = sprite.rect.top
+                    player.collision_rect.bottom = sprite.rect.top
 
                     player.on_floor = True
                     player.direction.y = 0
 
         if player.on_floor and player.direction.y > 1 or player.direction.y < 0:
             player.on_floor = False
-        if player.on_celling and player.direction.y > 0:
-            player.on_celling = False
+        # if player.on_celling and player.direction.y > 0:
+        #     player.on_celling = False
 
     def checking_player_death(self):
         player = self.player_sprites.sprite
@@ -280,6 +281,7 @@ class Level:
         if collided_coins:
             for coin in collided_coins:
                 self.update_coin_count(coin.value)
+                self.coin_sound.play()
 
     def enimes_collision(self):
         enimes_collided = pygame.sprite.spritecollide(self.player_sprites.sprite,self.enemies_sprites,False)
@@ -311,6 +313,9 @@ class Level:
         self.bg_palms_sprites.draw(self.display_surface)
         self.bg_palms_sprites.update(self.world_shift)
         
+        self.jump_sprtie.draw(self.display_surface)
+        self.jump_sprtie.update(self.world_shift)
+
         self.tarrain_sprites.draw(self.display_surface)
         self.tarrain_sprites.update(self.world_shift)
 
@@ -343,8 +348,7 @@ class Level:
             self.create_jump_particle()
 
         self.run_particle_animation()
-        self.jump_sprtie.draw(self.display_surface)
-        self.jump_sprtie.update(self.world_shift)
+        
 
         #fb palms
         self.fb_palms_sprites.draw(self.display_surface)

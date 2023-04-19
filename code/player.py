@@ -33,9 +33,12 @@ class Player(pygame.sprite.Sprite):
         self.facing_right = True
         self.current_x = 0
 
+        self.collision_rect = pygame.Rect(self.rect.topleft,(50,self.rect.height))
+
+        #particle jump
         self.particle_frame_index =0
         self.jump = False
-
+        self.jump_sound = pygame.mixer.Sound("../audio/effects/jump.wav")
         #health mangement
         self.update_health = update_health
         self.invinsiblity = False
@@ -80,11 +83,14 @@ class Player(pygame.sprite.Sprite):
             self.frame_index = 0
 
         image = animation_position[int(self.frame_index)]
+
         if self.facing_right:
             self.image = image
+            self.rect.bottomleft = self.collision_rect.bottomleft
         else:
             flipped_image = pygame.transform.flip(image, True, False)
             self.image = flipped_image
+            self.rect.bottomright = self.collision_rect.bottomright
 
         if self.invinsiblity:
             alpha = self.wave_value()
@@ -92,19 +98,10 @@ class Player(pygame.sprite.Sprite):
         else:
             self.image.set_alpha(255)
 
-        # set rect
-        if self.on_floor and self.on_right:
-            self.rect = self.image.get_rect(bottomright=self.rect.bottomright)
-        elif self.on_floor and self.on_left:
-            self.rect = self.image.get_rect(bottomleft=self.rect.bottomleft)
-        elif self.on_floor:
-            self.rect = self.image.get_rect(midbottom=self.rect.midbottom)
-        elif self.on_celling and self.on_right:
-            self.rect = self.image.get_rect(topright=self.rect.topright)
-        elif self.on_celling and self.on_left:
-            self.rect = self.image.get_rect(topleft=self.rect.topleft)
-        elif self.on_celling:
-            self.rect = self.image.get_rect(midtop=self.rect.midtop)
+        self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
+
+        
+
 
     def player_status(self):
 
@@ -133,10 +130,11 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_w] and self.on_floor:
             self.direction.y = -self.jump_speed
             self.jump = True
+            self.jump_sound.play()
         
     def apply_gravity(self):
         self.direction.y += self.gravity
-        self.rect.y += self.direction.y
+        self.collision_rect.y += self.direction.y
 
     def update(self):
         self.input()
